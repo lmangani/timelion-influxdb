@@ -98,14 +98,14 @@ module.exports = new Datasource('influxdb', {
       return resp.json()
     }).then(function (resp) {
       // Debug
-      console.log('INFLUX RESP:',resp):
+      console.log('INFLUX RESP:', resp)
 
       if (resp.errors || !resp) {
         throw new Error('Error connecting to InfluxDB API: ' +
-          resp.errors[0].errorcode + ' ' + resp.errors[0].message || resp.code )
+          resp.errors[0].errorcode + ' ' + resp.errors[0].message || resp.code)
       }
       if (!resp.results || !resp.results.series) {
-        throw new Error('No results from InfluxDB API! '
+        throw new Error('No results from InfluxDB API! ')
       }
       // SL supplies secs since epoch. Kibana wants ms since epoch
       var data = _.map(resp.results.series[0].values[0], function (timestamp, value) {
