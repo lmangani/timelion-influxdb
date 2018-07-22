@@ -25,7 +25,7 @@ if [ -z $OVERRIDE ]; then
   echo "Patching with version $VERSION ... "
   sed -Ei "s/(\"version\":).*$/\1 \"$VERSION\",/" package.json
 fi
-npm install
+npm install --production
 cd $TEMPDIR
 
 # Create Archive
