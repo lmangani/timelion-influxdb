@@ -2,7 +2,10 @@
 
 [Timelion](https://www.elastic.co/blog/timelion-timeline) (part of [Kibana](https://www.elastic.co/products/kibana)) provides a plugin mechanism by which you can create your own connectors to external datasets.
 
-This plugin allows you to render data from your TICK stack inside the Kibana web interface, without having to copy timeseries into Elasticsearch.
+This plugin allows you to render data from the [TICK](https://portal.influxdata.com/downloads) stack inside the Kibana web interface, without having to duplicate timeseries into Elasticsearch.
+
+![image](https://user-images.githubusercontent.com/1423657/43050440-198d7b5c-8e09-11e8-9289-d2531dc80142.png)
+
 
 
 ## Installation instructions
