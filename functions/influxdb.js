@@ -33,7 +33,7 @@ module.exports = new Datasource('influxdb', {
     {
       name: 'where',
       types: ['string', 'null'],
-      help: 'The where condition to plot, ie: region=west' +
+      help: 'The where condition to plot, ie: region=west'
     }
   ],
   help: 'Pull data from InfluxDB.',
