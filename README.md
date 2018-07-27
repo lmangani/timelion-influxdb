@@ -19,7 +19,7 @@ kibana-plugin install ./timelion-influxdb-1.0.0.zip
 
 ### Configuration
 * All parameters including hostname can be defined inside the Timelion function
-* *OPTIONAL* static InfluxDB hostname, username and password can be stored in `src/core_plugins/timelion/timelion.json`, e.g.
+* *OPTIONAL* static InfluxDB parameters can be stored in `src/core_plugins/timelion/timelion.json`, e.g.
 ```
 "influxdb": {
     "hostname": "my.influx.db",
