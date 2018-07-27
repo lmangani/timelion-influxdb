@@ -4,7 +4,8 @@
 
 This plugin allows you to render data from the [TICK](https://portal.influxdata.com/downloads) stack inside the Kibana web interface, without having to duplicate timeseries into Elasticsearch.
 
-![image](https://user-images.githubusercontent.com/1423657/43050440-198d7b5c-8e09-11e8-9289-d2531dc80142.png)
+![image](https://user-images.githubusercontent.com/1423657/43320289-4f1074d0-91a8-11e8-9c4e-7964002a7f16.png)
+
 
 
 
@@ -12,7 +13,7 @@ This plugin allows you to render data from the [TICK](https://portal.influxdata.
 
 * Extract the contents of this repository into kibana/plugins/timelion-influxdb
 * remove the file "gulpfile.js" (it's only needed for development purposes)
-* Add the InfluxDB hostname, username and password to src/core_plugins/timelion/timelion.json, e.g.
+* Add *OPTIONAL* InfluxDB hostname, username and password to src/core_plugins/timelion/timelion.json, e.g.
 ```
 "influxdb": {
     "hostname": "my.influx.db",
@@ -25,14 +26,12 @@ This plugin allows you to render data from the [TICK](https://portal.influxdata.
 
 
 ## Usage (within Kibana's Timelion)
-
-```
-.influxdb(name, db, metric, where)
-```
+#### Parameters
+![image](https://user-images.githubusercontent.com/1423657/43320300-560a576a-91a8-11e8-9ad7-45cc6993c254.png)
 
 #### Example:
 ```
-.influxdb('RTCP Jitter', 'hep', 'rtcp_jitter', 'zone=west')
+.influxdb(hostname='my.influx.db', db='telegraf', label='mem',metric='cpu', groupBy="1m", policy="autogen", field="usage_system")
 ```
 
 ## Versions
@@ -50,8 +49,10 @@ Install the code using "npm install" and "npm start" as described in the demo pl
 ## Other plugins that might be of interest
 
 * [Random](https://github.com/rashidkpc/timelion-random) (by the author of Timelion) - A demo showing how to create a timelion plugin
-* [Yahoo Finance](https://github.com/rashidkpc/timelion-yfinance) (by the author of Timelion) - loads share prices from Yahoo Finance into Timelion (another example plugin)
 * [USAFacts](https://github.com/rashidkpc/timelion-usafacts) (by the author of Timelion) - grabs series data from [usafacts.org](http://usafacts.org)
 * [Google Analytics](https://github.com/bahaaldine/timelion-google-analytics) - brings Google Analytics data to Timelion
 * [Mathlion](https://github.com/fermiumlabs/mathlion) (from Fermium Labs) - enables equation parsing and advanced maths
 
+## Credits
+
+This project is sponsored by [QXIP BV](http://qxip.net)
