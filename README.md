@@ -4,8 +4,7 @@
 
 This plugin allows rendering data from the [InfluxDB](https://portal.influxdata.com/downloads) queries in Timelion, without having to duplicate timeseries into Elasticsearch.
 
-<img src="https://user-images.githubusercontent.com/1423657/43320289-4f1074d0-91a8-11e8-9c4e-7964002a7f16.png" width=600 />
-
+![ezgif com-optimize 5](https://user-images.githubusercontent.com/1423657/43321404-08a22882-91ac-11e8-8eed-a961d71a0c65.gif)
 
 
 
