@@ -3,6 +3,8 @@ var Datasource = require('../../../src/core_plugins/timelion/server/lib/classes/
 var fetch = require('node-fetch')
 fetch.Promise = require('bluebird')
 var _ = require('lodash')
+const querystring = require('querystring');
+const URL = require('url').Url;
 
 /*
   This timelion plugin can pull data from you InfluxDB deployment.
@@ -21,19 +23,44 @@ module.exports = new Datasource('influxdb', {
       help: 'The label for the chart'
     },
     {
+      name: 'hostname',
+      types: ['string', 'null'],
+      help: 'The InfluxDB host to query.'
+    },
+    {
+      name: 'port',
+      types: ['string', 'null'],
+      help: 'The InfluxDB port to query.'
+    },
+    {
       name: 'db',
       types: ['string', 'null'],
       help: 'The database to query.'
     },
     {
+      name: 'policy',
+      types: ['string', 'autogen'],
+      help: 'The retention policy to plot.'
+    },
+    {
       name: 'metric',
       types: ['string', 'null'],
-      help: 'The metric to plot.'
+      help: 'The metric measurement to plot.'
+    },
+    {
+      name: 'field',
+      types: ['string', 'null'],
+      help: 'The metric field to plot.'
     },
     {
       name: 'where',
       types: ['string', 'null'],
       help: 'The where condition to plot, ie: region=west'
+    },
+    {
+      name: 'groupBy',
+      types: ['string', '1m'],
+      help: 'Timeseries grouping measure, ie: 1m'
     }
   ],
   help: 'Pull data from InfluxDB.',
@@ -50,53 +77,44 @@ module.exports = new Datasource('influxdb', {
       beginstamp and endstamp are both required, and need to be in Seconds
       since Epoch (Kibana provides them in milliseconds since Epoch)
     */
-    var beginTime = Math.floor(tlConfig.time.from / 1000)
-    var endTime = Math.floor(tlConfig.time.to / 1000)
+    var beginTime = new Date(tlConfig.time.from).toISOString()
+    var endTime = new Date(tlConfig.time.to).toISOString()
     var username = tlConfig.settings['timelion:influxdb.username']
     var password = tlConfig.settings['timelion:influxdb.password']
     var sl_hostname = tlConfig.settings['timelion:influxdb.hostname']
     var sl_port = tlConfig.settings['timelion:influxdb.port'] || 8086
+    var sl_policy = tlConfig.settings['timelion:influxdb.policy'] || 'autogen'
+    var sl_groupBy = tlConfig.settings['timelion:influxdb.groupBy'] || '1m'
 
-    var URL = 'http://' + sl_hostname + ':' + sl_port + '/query'
-    var DATA = {
-      q: 'SELECT * from ' + config.metric + ' WHERE time > ' + beginTime + ' AND time < ' + endTime,
-      db: config.db,
-      epoch: 's'
-    }
-    if (config.where) DATA.q += ' AND ' + config.where
-
-    if (!sl_hostname) {
-      throw new Error('influxdb plugin: hostname, username and password must be configured. ' +
-        'Edit the file kibana/src/core_plugins/timelion/timelion.json. ')
+    if (!sl_hostname && !config.hostname) {
+      throw new Error('influxdb plugin: hostname must be configured! ' +
+        'Edit the file kibana/src/core_plugins/timelion/timelion.json or add a hostname parameter.')
     }
 
-    var urlOptions = {
-      method: 'POST',
-      data: DATA,
-      headers: {
-        'Pragma': 'no-cache',
-        'Accept': 'application/json',
-        'Cache-Control': 'no-cache',
-        'x-em7-guid-paths': 1,
-        'Accept-Encoding': 'gzip, deflate'
-      }
+    if (!config.db && !config.metric) {
+      throw new Error('influxdb plugin: db and metric must be defined!')
     }
 
-    if (username && password) {
-      var authString = 'Basic ' + Buffer.from(username + ':' + password).toString('base64')
-      urlOptions.headers['Authorization'] = authString
+    var Q = '';
+        Q +=  'SELECT mean("' + config.field + '")';
+        Q +=  ' FROM "' + config.db + '"."' +sl_policy + '"."' +config.metric+ '"';
+        Q +=  " WHERE time > '" + beginTime + "' AND time < '" + endTime + "'";
+        if (config.where) Q += ' AND ' + config.where;
+        if (sl_groupBy) Q += ' GROUP BY time('+sl_groupBy+') FILL(null)';
+
+    var PARAMS = {
+        q: Q,
+	db: config.db
     };
+    if (config.username && config.password) { PARAMS.username = config.username; PARAMS.password = config.password; } 
+    var QPARAMS = querystring.stringify(PARAMS);
 
-    /*
-    console.log('influxdb plugin: URL = ' + URL);
-    console.log('influxdb plugin: Fetching from https://' + sl_hostname);
-    console.log('influxdb plugin: Date range: ' + new Date(tlConfig.time.from).toISOString() +
-                ' -> ' + new Date(tlConfig.time.to).toISOString());
-    /* */
+    var url = 'http://' + (config.hostname || sl_hostname) + ':' + (config.port || sl_port) + '/query?' + QPARAMS;
+    console.log('INFLUX QUERY URL:',url,PARAMS)
 
-    return fetch(URL, urlOptions).then(function (resp) {
-      return resp.json()
-    }).then(function (resp) {
+    return fetch(url)
+     .then(res => res.json())
+     .then(function (resp) {
       // Debug
       console.log('INFLUX RESP:', resp)
 
@@ -104,13 +122,14 @@ module.exports = new Datasource('influxdb', {
         throw new Error('Error connecting to InfluxDB API: ' +
           resp.errors[0].errorcode + ' ' + resp.errors[0].message || resp.code)
       }
-      if (!resp.results || !resp.results.series) {
+      if (!resp.results || !resp.results[0].series) {
         throw new Error('No results from InfluxDB API! ')
       }
-      // SL supplies secs since epoch. Kibana wants ms since epoch
-      var data = _.map(resp.results.series[0].values[0], function (timestamp, value) {
-        return [(timestamp * 1000), value ]
+      // Format data for timelion
+      var data = _.map(resp.results[0].series[0].values, function (pair, count) {
+        return [ pair[0], pair[1] ]
       })
+
       return {
         type: 'seriesList',
         list: [{

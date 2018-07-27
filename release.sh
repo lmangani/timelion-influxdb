@@ -29,7 +29,7 @@ npm install --production
 cd $TEMPDIR
 
 # Create Archive
-zip -r $APP-$VERSION.zip ./kibana -x *gulp*
+zip -r $APP-$VERSION.zip ./kibana -x *gulp* -x *.zip
 mv $APP-$VERSION.zip $APPDIR/
 cd $APPDIR
 
