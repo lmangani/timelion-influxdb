@@ -2,18 +2,25 @@
 
 [Timelion](https://www.elastic.co/blog/timelion-timeline) (part of [Kibana](https://www.elastic.co/products/kibana)) provides a plugin mechanism by which you can create your own connectors to external datasets.
 
-This plugin allows you to render data from the [TICK](https://portal.influxdata.com/downloads) stack inside the Kibana web interface, without having to duplicate timeseries into Elasticsearch.
+This plugin allows rendering data from the [InfluxDB](https://portal.influxdata.com/downloads) queries in Timelion, without having to duplicate timeseries into Elasticsearch.
 
-![image](https://user-images.githubusercontent.com/1423657/43320289-4f1074d0-91a8-11e8-9c4e-7964002a7f16.png)
+<img src="https://user-images.githubusercontent.com/1423657/43320289-4f1074d0-91a8-11e8-9c4e-7964002a7f16.png" width=600 />
 
 
 
 
 ## Installation instructions
 
-* Extract the contents of this repository into kibana/plugins/timelion-influxdb
-* remove the file "gulpfile.js" (it's only needed for development purposes)
-* Add *OPTIONAL* InfluxDB hostname, username and password to src/core_plugins/timelion/timelion.json, e.g.
+#### Package
+```
+git clone https://github.com/lmangani/timelion-influxdb && cd timelion-influxdb
+VERSION="6.2.4" ./release.sh
+kibana-plugin install ./timelion-influxdb-1.0.0.zip
+```
+
+### Configuration
+* All parameters including hostname can be defined inside the Timelion function
+* *OPTIONAL* static InfluxDB hostname, username and password can be stored in `src/core_plugins/timelion/timelion.json`, e.g.
 ```
 "influxdb": {
     "hostname": "my.influx.db",
@@ -41,12 +48,7 @@ The plugin is intended for use with Kibana 5 and 6
 If you are using a version of Kibana, you will need to edit kibana.version in the "package.json" file.
 
 
-## Development/Debugging instructions.
-
-Install the code using "npm install" and "npm start" as described in the demo plugin, [timelion-random](https://github.com/rashidkpc/timelion-random)
-
-
-## Other plugins that might be of interest
+#### Other plugins that might be of interest
 
 * [Random](https://github.com/rashidkpc/timelion-random) (by the author of Timelion) - A demo showing how to create a timelion plugin
 * [USAFacts](https://github.com/rashidkpc/timelion-usafacts) (by the author of Timelion) - grabs series data from [usafacts.org](http://usafacts.org)
@@ -55,4 +57,8 @@ Install the code using "npm install" and "npm start" as described in the demo pl
 
 ## Credits
 
-This project is sponsored by [QXIP BV](http://qxip.net)
+The timelion-InfluxDB plugin is sponsored by [QXIP BV](http://qxip.net)
+
+Elasticsearch and Kibana are trademarks of Elasticsearch BV, registered in the U.S. and in other countries.
+
+
