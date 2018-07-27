@@ -5,6 +5,7 @@ fetch.Promise = require('bluebird')
 var _ = require('lodash')
 const querystring = require('querystring');
 const URL = require('url').Url;
+import moment from 'moment';
 
 /*
   This timelion plugin can pull data from you InfluxDB deployment.
@@ -100,7 +101,7 @@ module.exports = new Datasource('influxdb', {
         Q +=  ' FROM "' + config.db + '"."' +sl_policy + '"."' +config.metric+ '"';
         Q +=  " WHERE time > '" + beginTime + "' AND time < '" + endTime + "'";
         if (config.where) Q += ' AND ' + config.where;
-        if (sl_groupBy) Q += ' GROUP BY time('+sl_groupBy+') FILL(null)';
+        if (sl_groupBy) Q += ' GROUP BY time('+sl_groupBy+') FILL(0)';
 
     var PARAMS = {
         q: Q,
@@ -122,21 +123,25 @@ module.exports = new Datasource('influxdb', {
         throw new Error('Error connecting to InfluxDB API: ' +
           resp.errors[0].errorcode + ' ' + resp.errors[0].message || resp.code)
       }
-      if (!resp.results || !resp.results[0].series) {
+      if (!resp.results || !resp.results[0].series[0]) {
         throw new Error('No results from InfluxDB API! ')
       }
+
       // Format data for timelion
-      var data = _.map(resp.results[0].series[0].values, function (pair, count) {
-        return [ pair[0], pair[1] ]
-      })
+      var data = _.compact(_.map(resp.results[0].series[0].values, function (pair, count) {
+	if (pair[1] == null || !pair[1] ) return;
+        return [ moment(pair[0]).valueOf(), pair[1] ]
+      }));
 
       return {
         type: 'seriesList',
         list: [{
           data: data,
           type: 'series',
-          fit: 'nearest',
-          label: config.label
+          label: config.label,
+	  meta: {
+            influxdb_request: Q
+          }
         }]
       }
     }).catch(function (e) {
