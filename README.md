@@ -49,6 +49,7 @@ This simplified example is instpired by [rmoff](https://rmoff.net/2017/01/18/kib
 ```
 $thres=0.02, .influxdb(hostname='my.influx.db', db='telegraf', label='mem',metric='cpu', groupBy="1m", policy="autogen", field="usage_system").lines(1).if(eq, 0, null).holt(0.9, 0.1, 0.9, 0.5h).color(#eee).lines(10).label('Prediction'), .influxdb(hostname='my.influx.db', db='telegraf', label='mem',metric='cpu', groupBy="1m", policy="autogen", field="usage_system").color(#666).lines(1).label(Actual), .influxdb(hostname='my.influx.db', db='telegraf', label='mem',metric='cpu', groupBy="1m", policy="autogen", field="usage_system").lines(1).if(eq, 0, null).holt(0.9, 0.1, 0.9, 0.5h).subtract(.influxdb(hostname='my.influx.db', db='telegraf', label='mem',metric='cpu', groupBy="1m", policy="autogen", field="usage_system")).abs().if(lt, $thres, null, .influxdb(hostname='my.influx.db', db='telegraf', label='mem',metric='cpu', groupBy="1m", policy="autogen", field="usage_system")).points(10,3,0).color(#c66).label('Anomaly')
 ```
+![image](https://user-images.githubusercontent.com/1423657/43539249-ab80b7b4-95c4-11e8-8c8d-e86ae95635d5.png)
 
 ## Versions
 
