@@ -44,6 +44,11 @@ kibana-plugin install ./timelion-influxdb-1.0.0.zip
 ```
 .influxdb(hostname='my.influx.db', db='telegraf', label='used',metric='mem', groupBy="1m", policy="autogen", field="used").cusum().derivative().mvavg(5).multiply(8).divide(1048576).lines(fill=2,width=1).color(#00FF00)
 ```
+##### Telegraf Anomaly Detection
+This simplified example is instpired by [rmoff](https://rmoff.net/2017/01/18/kibana-timelion-anomaly-detection/)
+```
+$thres=0.02, .influxdb(hostname='my.influx.db', db='telegraf', label='mem',metric='cpu', groupBy="1m", policy="autogen", field="usage_system").lines(1).if(eq, 0, null).holt(0.9, 0.1, 0.9, 0.5h).color(#eee).lines(10).label('Prediction'), .influxdb(hostname='my.influx.db', db='telegraf', label='mem',metric='cpu', groupBy="1m", policy="autogen", field="usage_system").color(#666).lines(1).label(Actual), .influxdb(hostname='my.influx.db', db='telegraf', label='mem',metric='cpu', groupBy="1m", policy="autogen", field="usage_system").lines(1).if(eq, 0, null).holt(0.9, 0.1, 0.9, 0.5h).subtract(.influxdb(hostname='my.influx.db', db='telegraf', label='mem',metric='cpu', groupBy="1m", policy="autogen", field="usage_system")).abs().if(lt, $thres, null, .influxdb(hostname='my.influx.db', db='telegraf', label='mem',metric='cpu', groupBy="1m", policy="autogen", field="usage_system")).points(10,3,0).color(#c66).label('Anomaly')
+```
 
 ## Versions
 
